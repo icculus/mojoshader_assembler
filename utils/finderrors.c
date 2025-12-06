@@ -14,7 +14,7 @@
 #include <sys/types.h>
 #include <errno.h>
 
-#include "mojoshader.h"
+#include "mojoshader_assembler.h"
 
 #if FINDERRORS_COMPILE_SHADERS
 #include "SDL.h"

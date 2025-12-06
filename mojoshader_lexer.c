@@ -20,8 +20,8 @@
 //  HLSL and shader assembly language, and follows the quirks of Microsoft's
 //  tools.
 
-#define __MOJOSHADER_INTERNAL__ 1
-#include "mojoshader_internal.h"
+#define __MOJOSHADER_ASSEMBLER_INTERNAL__ 1
+#include "mojoshader_assembler_internal.h"
 
 typedef unsigned char uchar;
 

@@ -10,12 +10,8 @@
 // !!! FIXME: this should probably use a formal grammar and not a hand-written
 // !!! FIXME:  pile of C code.
 
-#define __MOJOSHADER_INTERNAL__ 1
-#include "mojoshader_internal.h"
-
-#if !SUPPORT_PROFILE_BYTECODE
-#error Shader assembler needs bytecode profile. Fix your build.
-#endif
+#define __MOJOSHADER_ASSEMBLER_INTERNAL__ 1
+#include "mojoshader_assembler_internal.h"
 
 #if DEBUG_ASSEMBLER_PARSER
     #define print_debug_token(token, len, val) \
@@ -1133,7 +1129,7 @@ static const Instruction instructions[] =
     #define INSTRUCTION_STATE(op, opstr, s, a, t, w) { opstr, w, parse_args_##a },
     #define INSTRUCTION(op, opstr, slots, a, t, w) { opstr, w, parse_args_##a },
     #define MOJOSHADER_DO_INSTRUCTION_TABLE 1
-    #include "mojoshader_internal.h"
+    #include "mojoshader_assembler_internal.h"
 };
 
 

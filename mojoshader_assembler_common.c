@@ -1,5 +1,5 @@
-#define __MOJOSHADER_INTERNAL__ 1
-#include "mojoshader_internal.h"
+#define __MOJOSHADER_ASSEMBLER_INTERNAL__ 1
+#include "mojoshader_assembler_internal.h"
 #ifndef MOJOSHADER_USE_SDL_STDLIB
 #include <math.h>
 #endif /* MOJOSHADER_USE_SDL_STDLIB */

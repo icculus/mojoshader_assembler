@@ -7,8 +7,8 @@
  *  This file written by Ryan C. Gordon.
  */
 
-#define __MOJOSHADER_INTERNAL__ 1
-#include "mojoshader_internal.h"
+#define __MOJOSHADER_ASSEMBLER_INTERNAL__ 1
+#include "mojoshader_assembler_internal.h"
 
 #if DEBUG_PREPROCESSOR
     #define print_debug_token(token, len, val) \

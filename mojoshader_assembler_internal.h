@@ -1,7 +1,7 @@
-#ifndef _INCLUDE_MOJOSHADER_INTERNAL_H_
-#define _INCLUDE_MOJOSHADER_INTERNAL_H_
+#ifndef _INCLUDE_MOJOSHADER_ASSEMBLER_INTERNAL_H_
+#define _INCLUDE_MOJOSHADER_ASSEMBLER_INTERNAL_H_
 
-#ifndef __MOJOSHADER_INTERNAL__
+#ifndef __MOJOSHADER_ASSEMBLER_INTERNAL__
 #error Do not include this header from your applications.
 #endif
 
@@ -148,7 +148,7 @@ typedef Uint64 uint64;
 #endif
 #endif /* MOJOSHADER_USE_SDL_STDLIB */
 
-#include "mojoshader.h"
+#include "mojoshader_assembler.h"
 
 #define DEBUG_LEXER 0
 #define DEBUG_PREPROCESSOR 0
@@ -161,79 +161,6 @@ typedef Uint64 uint64;
 
 #define MAX_SHADER_MAJOR 3
 #define MAX_SHADER_MINOR 255  // vs_3_sw
-
-
-// If SUPPORT_PROFILE_* isn't defined, we assume an implicit desire to support.
-//  You get all the profiles unless you go out of your way to disable them.
-
-#ifndef SUPPORT_PROFILE_D3D
-#define SUPPORT_PROFILE_D3D 1
-#endif
-
-#ifndef SUPPORT_PROFILE_BYTECODE
-#define SUPPORT_PROFILE_BYTECODE 1
-#endif
-
-#ifndef SUPPORT_PROFILE_HLSL
-#define SUPPORT_PROFILE_HLSL 1
-#endif
-
-#ifndef SUPPORT_PROFILE_GLSL
-#define SUPPORT_PROFILE_GLSL 1
-#endif
-
-#ifndef SUPPORT_PROFILE_GLSL120
-#define SUPPORT_PROFILE_GLSL120 1
-#endif
-
-#ifndef SUPPORT_PROFILE_GLSLES
-#define SUPPORT_PROFILE_GLSLES 1
-#endif
-
-#ifndef SUPPORT_PROFILE_GLSLES3
-#define SUPPORT_PROFILE_GLSLES3 1
-#endif
-
-#ifndef SUPPORT_PROFILE_ARB1
-#define SUPPORT_PROFILE_ARB1 1
-#endif
-
-#ifndef SUPPORT_PROFILE_ARB1_NV
-#define SUPPORT_PROFILE_ARB1_NV 1
-#endif
-
-#ifndef SUPPORT_PROFILE_METAL
-#define SUPPORT_PROFILE_METAL 1
-#endif
-
-#ifndef SUPPORT_PROFILE_SPIRV
-#define SUPPORT_PROFILE_SPIRV 1
-#endif
-
-#ifndef SUPPORT_PROFILE_GLSPIRV
-#define SUPPORT_PROFILE_GLSPIRV 1
-#endif
-
-#if SUPPORT_PROFILE_ARB1_NV && !SUPPORT_PROFILE_ARB1
-#error nv profiles require arb1 profile. Fix your build.
-#endif
-
-#if SUPPORT_PROFILE_GLSL120 && !SUPPORT_PROFILE_GLSL
-#error glsl120 profile requires glsl profile. Fix your build.
-#endif
-
-#if SUPPORT_PROFILE_GLSLES && !SUPPORT_PROFILE_GLSL
-#error glsles profile requires glsl profile. Fix your build.
-#endif
-
-#if SUPPORT_PROFILE_GLSLES3 && !SUPPORT_PROFILE_GLSLES
-#error glsles3 profile requires glsles profile. Fix your build.
-#endif
-
-
-#if SUPPORT_PROFILE_GLSPIRV && !SUPPORT_PROFILE_SPIRV
-#error glspirv profile requires spirv profile. Fix your build.
-#endif
 
 // Microsoft's preprocessor has some quirks. In some ways, it doesn't work
 //  like you'd expect a C preprocessor to function.
@@ -257,9 +184,6 @@ void MOJOSHADER_runPreshader(const MOJOSHADER_preshader*, float*);
 #endif
 
 typedef unsigned int uint;  // this is a printf() helper. don't use for code.
-
-// Locale-independent float printing replacement for snprintf
-size_t MOJOSHADER_printFloat(char *text, size_t maxlen, float arg);
 
 #ifdef _MSC_VER
 #include <float.h>
@@ -834,7 +758,7 @@ void MOJOSHADER_spirv_link_attributes(const MOJOSHADER_parseData *vertex,
                                       int is_glspirv);
 #endif
 
-#endif  // _INCLUDE_MOJOSHADER_INTERNAL_H_
+#endif  // _INCLUDE_MOJOSHADER_ASSEMBLER_INTERNAL_H_
 
 
 #if MOJOSHADER_DO_INSTRUCTION_TABLE

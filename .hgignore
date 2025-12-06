@@ -1,5 +1,5 @@
 syntax:glob
-mojoshader_version.h
+mojoshader_assembler_version.h
 mojoshader_parser_hlsl.h
 cmake-build
 CMakeCache.txt
