@@ -13,12 +13,10 @@
 #include <SDL3/SDL_assert.h>
 #include <SDL3/SDL_endian.h>
 #include <SDL3/SDL_stdinc.h>
-#include <SDL3/SDL_loadso.h>
 #else
 #include <SDL_assert.h>
 #include <SDL_endian.h>
 #include <SDL_stdinc.h>
-#include <SDL_loadso.h>
 #endif
 #include <math.h> /* Needed for isinf/isnan :( */
 
@@ -121,11 +119,6 @@ typedef Uint64 uint64;
 
 /* endian.h */
 #define MOJOSHADER_BIG_ENDIAN (SDL_BYTEORDER == SDL_BIG_ENDIAN)
-
-/* dlfcn.h */
-#define dlopen(a, b) SDL_LoadObject(a)
-#define dlclose SDL_UnloadObject
-#define dlsym SDL_LoadFunction
 #else /* MOJOSHADER_USE_SDL_STDLIB */
 #include <stdio.h>
 #include <string.h>
@@ -157,21 +150,10 @@ typedef Uint64 uint64;
 #define DEBUG_TOKENIZER \
     (DEBUG_PREPROCESSOR || DEBUG_ASSEMBLER_PARSER || DEBUG_LEXER)
 
-// This is the highest shader version we currently support.
-
-#define MAX_SHADER_MAJOR 3
-#define MAX_SHADER_MINOR 255  // vs_3_sw
-
 // Microsoft's preprocessor has some quirks. In some ways, it doesn't work
 //  like you'd expect a C preprocessor to function.
 #ifndef MATCH_MICROSOFT_PREPROCESSOR
 #define MATCH_MICROSOFT_PREPROCESSOR 1
-#endif
-
-// Other stuff you can disable...
-
-#ifdef MOJOSHADER_EFFECT_SUPPORT
-void MOJOSHADER_runPreshader(const MOJOSHADER_preshader*, float*);
 #endif
 
 
@@ -271,39 +253,6 @@ static inline int Min(const int a, const int b)
 {
     return ((a < b) ? a : b);
 } // Min
-
-
-// Hashtables...
-
-typedef struct HashTable HashTable;
-typedef uint32 (*HashTable_HashFn)(const void *key, void *data);
-typedef int (*HashTable_KeyMatchFn)(const void *a, const void *b, void *data);
-typedef void (*HashTable_NukeFn)(const void *ctx, const void *key, const void *value, void *data);
-
-HashTable *hash_create(void *data, const HashTable_HashFn hashfn,
-                       const HashTable_KeyMatchFn keymatchfn,
-                       const HashTable_NukeFn nukefn,
-                       const int stackable,
-                       MOJOSHADER_malloc m, MOJOSHADER_free f, void *d);
-void hash_destroy(HashTable *table, const void *ctx);
-int hash_insert(HashTable *table, const void *key, const void *value);
-int hash_remove(HashTable *table, const void *key, const void *ctx);
-int hash_find(const HashTable *table, const void *key, const void **_value);
-int hash_iter(const HashTable *table, const void *key, const void **_value, void **iter);
-int hash_iter_keys(const HashTable *table, const void **_key, void **iter);
-
-uint32 hash_hash_string(const void *sym, void *unused);
-int hash_keymatch_string(const void *a, const void *b, void *unused);
-
-
-// String -> String map ...
-typedef HashTable StringMap;
-StringMap *stringmap_create(const int copy, MOJOSHADER_malloc m,
-                            MOJOSHADER_free f, void *d);
-void stringmap_destroy(StringMap *smap);
-int stringmap_insert(StringMap *smap, const char *key, const char *value);
-int stringmap_remove(StringMap *smap, const char *key);
-int stringmap_find(const StringMap *smap, const char *key, const char **_val);
 
 
 // String caching...
@@ -696,67 +645,6 @@ const char *preprocessor_sourcepos(Preprocessor *pp, unsigned int *pos);
 void MOJOSHADER_print_debug_token(const char *subsystem, const char *token,
                                   const unsigned int tokenlen,
                                   const Token tokenval);
-
-
-#if SUPPORT_PROFILE_SPIRV
-// Patching SPIR-V binaries before linking is needed to ensure locations do not
-// overlap between shader stages. Unfortunately, OpDecorate takes Literal, so we
-// can't use Result <id> from OpSpecConstant and leave this up to specialization
-// mechanism.
-// Patch table must be propagated from parsing to program linking, but since
-// MOJOSHADER_parseData is public and I'd like to avoid changing ABI and exposing
-// this, it is appended to MOJOSHADER_parseData::output using postflight buffer.
-typedef struct SpirvPatchEntry
-{
-    uint32 offset;
-    int32 location;
-} SpirvPatchEntry;
-
-typedef struct SpirvPatchTable
-{
-    // Patches for uniforms
-    SpirvPatchEntry vpflip;
-    SpirvPatchEntry array_vec4;
-    SpirvPatchEntry array_ivec4;
-    SpirvPatchEntry array_bool;
-    SpirvPatchEntry samplers[16];
-    int32 location_count;
-
-    // TEXCOORD0 is patched to PointCoord if VS outputs PointSize.
-    // In `helpers`: [OpDecorate|id|Location|0xDEADBEEF] -> [OpDecorate|id|BuiltIn|PointCoord]
-    // Offset derived from attrib_offsets[TEXCOORD][0].
-    uint32 pointcoord_var_offset; // in `mainline_intro`, [OpVariable|tid|id|StorageClass], patch tid to pvec2i
-    uint32 pointcoord_load_offset; // in `mainline_top`, [OpLoad|tid|id|src_id], patch tid to vec2
-    uint32 tid_pvec2i;
-    uint32 tid_vec2;
-    uint32 tid_pvec4i;
-
-    /// Patches for TEXCOORD0 and vertex attribute types
-    uint32 tid_vec4;
-    uint32 tid_ivec4;
-    uint32 tid_uvec4;
-
-    // Patches for vertex attribute types
-    uint32 tid_vec4_p;
-    uint32 tid_ivec4_p;
-    uint32 tid_uvec4_p;
-    uint32 attrib_type_offsets[MOJOSHADER_USAGE_TOTAL][16];
-    struct
-    {
-        uint32 num_loads;
-        uint32 *load_types;
-        uint32 *load_opcodes;
-    } attrib_type_load_offsets[MOJOSHADER_USAGE_TOTAL][16];
-
-    // Patches for linking vertex output/pixel input
-    uint32 attrib_offsets[MOJOSHADER_USAGE_TOTAL][16];
-    uint32 output_offsets[16];
-} SpirvPatchTable;
-
-void MOJOSHADER_spirv_link_attributes(const MOJOSHADER_parseData *vertex,
-                                      const MOJOSHADER_parseData *pixel,
-                                      int is_glspirv);
-#endif
 
 #endif  // _INCLUDE_MOJOSHADER_ASSEMBLER_INTERNAL_H_
 
